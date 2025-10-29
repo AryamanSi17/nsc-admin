@@ -1,0 +1,25 @@
+{
+  "name": "nsc-admin",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "test": "node test.js"
+  },
+  "dependencies": {
+    "adminjs": "^7.0.0",
+    "@adminjs/express": "^6.0.0",
+    "@adminjs/mongoose": "^4.0.0",
+    "@adminjs/design-system": "^4.0.0",
+    "express": "^4.18.2",
+    "express-session": "^1.17.3",
+    "mongoose": "^8.0.0",
+    "bcrypt": "^5.1.1",
+    "jsonwebtoken": "^9.0.2",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}

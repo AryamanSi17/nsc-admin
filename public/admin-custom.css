@@ -1,0 +1,45 @@
+/* Force hide everything on the left side of login */
+body > div > div > div:first-child {
+  display: none !important;
+}
+
+/* Target the login wrapper */
+body > div > div {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  min-height: 100vh !important;
+  background: linear-gradient(135deg, #04445E 0%, #169AB4 100%) !important;
+}
+
+/* Make the right panel (form) full width */
+body > div > div > div:last-child {
+  max-width: 450px !important;
+  width: 100% !important;
+  flex: 1 !important;
+  padding: 20px !important;
+}
+
+/* Hide any images */
+img[alt*="AdminJS"] {
+  display: none !important;
+}
+
+/* Remove background images */
+div[style*="background-image"] {
+  background-image: none !important;
+}
+
+/* Style the form container */
+form {
+  background: white !important;
+  padding: 40px !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15) !important;
+}
+
+/* Additional broad selector to hide left panel */
+[class*="Login"] > div:first-child,
+[class*="login"] > div:first-child {
+  display: none !important;
+}
