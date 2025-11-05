@@ -12,7 +12,8 @@ export const workshopResourceOptions = {
       position: 2,
       availableValues: [
         { value: 'BLS', label: 'BLS - Basic Life Support' },
-        { value: 'ACLS', label: 'ACLS - Advanced Cardiovascular Life Support' }
+        { value: 'ACLS', label: 'ACLS - Advanced Cardiovascular Life Support' },
+        { value: 'BLS & ACLS', label: 'BLS & ACLS - Combined Course' }
       ]
     },
     date: {

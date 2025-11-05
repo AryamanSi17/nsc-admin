@@ -12,7 +12,7 @@ const workshopSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['BLS', 'ACLS'],
+    enum: ['BLS', 'ACLS','BLS & ACLS'],
     required: true
   },
   date: {

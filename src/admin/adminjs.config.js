@@ -12,6 +12,9 @@ import { conferenceResourceOptions } from './resources/conference.resource.js';
 import { conferenceRegistrationResourceOptions } from './resources/conferenceRegistration.resource.js';
 import { workshopResourceOptions } from './resources/workshop.resource.js';
 import { workshopRegistrationResourceOptions } from './resources/workshopRegistration.resource.js';
+import { EmrTrainingRegistration } from '../models/emrTrainingRegistration.model.js';
+import { emrTrainingRegistrationResourceOptions } from './resources/emrTrainingRegistration.resource.js';
+
 import { componentLoader, Components } from './component-loader.js';
 
 AdminJS.registerAdapter({
@@ -27,7 +30,8 @@ export const createAdminJS = () => {
       { resource: Conference, options: conferenceResourceOptions },
       { resource: ConferenceRegistration, options: conferenceRegistrationResourceOptions },
       { resource: Workshop, options: workshopResourceOptions },
-      { resource: WorkshopRegistration, options: workshopRegistrationResourceOptions }
+      { resource: WorkshopRegistration, options: workshopRegistrationResourceOptions },
+      { resource: EmrTrainingRegistration, options: emrTrainingRegistrationResourceOptions }
     ],
     rootPath: '/admin',
     branding: {

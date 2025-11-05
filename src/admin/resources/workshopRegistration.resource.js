@@ -42,12 +42,7 @@ export const workshopRegistrationResourceOptions = {
     'certificate.url': {
       isVisible: { list: false, show: true, edit: false },
       type: 'string',
-      position: 10,
-      components: {
-        show: {
-          component: 'CertificateUrl'
-        }
-      }
+      position: 10
     },
     'certificate.uploadedAt': {
       isVisible: { list: false, show: true, edit: false },
@@ -83,82 +78,77 @@ export const workshopRegistrationResourceOptions = {
     'updatedAt'
   ],
   actions: {
-    uploadCertificate: {
-      actionType: 'record',
-      icon: 'Upload',
-      label: 'Upload Certificate',
-      component: false,
-      handler: async (request, response, context) => {
-        const { record, currentAdmin } = context;
-        
-        if (request.method === 'post') {
-          const { certificate } = request.payload || {};
+    list: {
+      before: async (request) => {
+        return request;
+      },
+      after: async (response, request, context) => {
+        if (response.records) {
+          const { WorkshopRegistration } = await import('../../models/workshopRegistration.model.js');
           
-          if (!certificate) {
-            return {
-              record: record.toJSON(currentAdmin),
-              notice: {
-                message: 'Please select a certificate file',
-                type: 'error',
-              },
-            };
-          }
+          const recordIds = response.records.map(r => r.id);
+          const registrations = await WorkshopRegistration.find({ _id: { $in: recordIds } })
+            .populate('workshop', 'title type')
+            .populate('user', 'firstName lastName email fullName')
+            .lean();
 
-          try {
-            // Handle file upload
-            const formData = new FormData();
-            formData.append('certificate', certificate);
-
-            const uploadResponse = await fetch(
-              `http://localhost:5000/api/workshops/registrations/${record.id()}/certificate`,
-              {
-                method: 'POST',
-                body: formData,
-                headers: {
-                  'Authorization': `Bearer ${currentAdmin.token}`,
-                },
+          const registrationMap = registrations.reduce((acc, reg) => {
+            acc[reg._id.toString()] = reg;
+            return acc;
+          }, {});
+          
+          response.records = response.records.map(record => {
+            const registration = registrationMap[record.id];
+            if (registration) {
+              if (registration.workshop) {
+                record.params.workshop = `${registration.workshop.title} (${registration.workshop.type})`;
               }
-            );
-
-            const data = await uploadResponse.json();
-
-            if (data.success) {
-              return {
-                record: record.toJSON(currentAdmin),
-                notice: {
-                  message: 'Certificate uploaded successfully!',
-                  type: 'success',
-                },
-                redirectUrl: context.h.recordActionUrl({
-                  resourceId: context.resource.id(),
-                  recordId: record.id(),
-                  actionName: 'show',
-                }),
-              };
-            } else {
-              return {
-                record: record.toJSON(currentAdmin),
-                notice: {
-                  message: data.message || 'Failed to upload certificate',
-                  type: 'error',
-                },
-              };
+              if (registration.user) {
+                const userName = registration.user.fullName || 
+                                `${registration.user.firstName} ${registration.user.lastName}`;
+                record.params.user = `${userName} (${registration.user.email})`;
+              }
             }
-          } catch (error) {
-            return {
-              record: record.toJSON(currentAdmin),
-              notice: {
-                message: 'Error uploading certificate',
-                type: 'error',
-              },
-            };
+            return record;
+          });
+        }
+        return response;
+      }
+    },
+    show: {
+      before: async (request) => {
+        return request;
+      },
+      after: async (response, request, context) => {
+        if (response.record) {
+          const { WorkshopRegistration } = await import('../../models/workshopRegistration.model.js');
+          
+          const registration = await WorkshopRegistration.findById(response.record.id)
+            .populate('workshop', 'title type date location')
+            .populate('user', 'firstName lastName email fullName')
+            .populate('confirmedBy', 'firstName lastName')
+            .populate('rejectedBy', 'firstName lastName')
+            .lean();
+          
+          if (registration) {
+            if (registration.workshop) {
+              response.record.params.workshop = `${registration.workshop.title} (${registration.workshop.type}) - ${new Date(registration.workshop.date).toLocaleDateString()}`;
+            }
+            if (registration.user) {
+              const userName = registration.user.fullName || 
+                              `${registration.user.firstName} ${registration.user.lastName}`;
+              response.record.params.user = `${userName} (${registration.user.email})`;
+            }
+            if (registration.confirmedBy) {
+              response.record.params.confirmedBy = `${registration.confirmedBy.firstName} ${registration.confirmedBy.lastName}`;
+            }
+            if (registration.rejectedBy) {
+              response.record.params.rejectedBy = `${registration.rejectedBy.firstName} ${registration.rejectedBy.lastName}`;
+            }
           }
         }
-
-        return {
-          record: record.toJSON(currentAdmin),
-        };
-      },
+        return response;
+      }
     },
     new: {
       isAccessible: false
@@ -210,7 +200,7 @@ export const workshopRegistrationResourceOptions = {
     }
   },
   navigation: {
-    name: 'Workshop Registrations',
+    name: 'Workshop Management',
     icon: 'UserCheck'
   }
 };
