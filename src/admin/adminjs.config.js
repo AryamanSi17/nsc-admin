@@ -6,15 +6,16 @@ import { Conference } from '../models/conference.model.js';
 import { ConferenceRegistration } from '../models/conferenceRegistration.model.js';
 import { Workshop } from '../models/workshop.model.js';
 import { WorkshopRegistration } from '../models/workshopRegistration.model.js';
+import { Publication } from '../models/publication.model.js';
 import { userResourceOptions } from './resources/user.resource.js';
 import { cvResourceOptions } from './resources/cv.resource.js';
 import { conferenceResourceOptions } from './resources/conference.resource.js';
 import { conferenceRegistrationResourceOptions } from './resources/conferenceRegistration.resource.js';
 import { workshopResourceOptions } from './resources/workshop.resource.js';
 import { workshopRegistrationResourceOptions } from './resources/workshopRegistration.resource.js';
+import { publicationResourceOptions } from './resources/publication.resource.js';
 import { EmrTrainingRegistration } from '../models/emrTrainingRegistration.model.js';
 import { emrTrainingRegistrationResourceOptions } from './resources/emrTrainingRegistration.resource.js';
-
 import { componentLoader, Components } from './component-loader.js';
 
 AdminJS.registerAdapter({
@@ -31,6 +32,7 @@ export const createAdminJS = () => {
       { resource: ConferenceRegistration, options: conferenceRegistrationResourceOptions },
       { resource: Workshop, options: workshopResourceOptions },
       { resource: WorkshopRegistration, options: workshopRegistrationResourceOptions },
+      { resource: Publication, options: publicationResourceOptions },
       { resource: EmrTrainingRegistration, options: emrTrainingRegistrationResourceOptions }
     ],
     rootPath: '/admin',
