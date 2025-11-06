@@ -8,7 +8,7 @@ const projectSchema = new mongoose.Schema({
   },
   stage: {
     type: Number,
-    enum: [1, 2, 3, 4, 5, 6, 7],
+    enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
     default: 1,
     required: true
   },
@@ -80,13 +80,11 @@ const publicationSchema = new mongoose.Schema({
   timestamps: true 
 });
 
-// Indexes for better query performance
 publicationSchema.index({ user: 1 });
 publicationSchema.index({ userEmail: 1 });
 publicationSchema.index({ status: 1 });
 publicationSchema.index({ 'projects.stage': 1 });
 
-// Validate that projects array length matches numberOfProjects
 publicationSchema.pre('save', function(next) {
   if (this.projects.length !== this.numberOfProjects) {
     next(new Error('Number of projects must match the numberOfProjects field'));

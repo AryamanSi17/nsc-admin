@@ -1,58 +1,4 @@
 import { Components } from '../component-loader.js';
-import uploadFeature from '@adminjs/upload';
-import { componentLoader } from '../component-loader.js';
-
-const updateProjectStageAction = {
-  actionType: 'record',
-  icon: 'ArrowUp',
-  label: 'Update Project Stage',
-  component: false,
-  handler: async (request, response, context) => {
-    const { record, resource, h } = context;
-    
-    if (request.method === 'get') {
-      return {
-        record: record.toJSON(context.currentAdmin),
-      };
-    }
-
-    if (request.method === 'post') {
-      const { projectId, stage } = request.payload;
-      
-      const publication = await resource.findOne(record.id());
-      const projects = publication.params.projects;
-      
-      const projectIndex = projects.findIndex(p => p._id.toString() === projectId);
-      
-      if (projectIndex !== -1) {
-        projects[projectIndex].stage = parseInt(stage);
-        projects[projectIndex].stageHistory.push({
-          stage: parseInt(stage),
-          movedAt: new Date(),
-          movedBy: context.currentAdmin._id
-        });
-        
-        await resource.update(record.id(), { projects });
-        
-        return {
-          record: record.toJSON(context.currentAdmin),
-          notice: {
-            message: 'Project stage updated successfully',
-            type: 'success',
-          },
-        };
-      }
-      
-      return {
-        record: record.toJSON(context.currentAdmin),
-        notice: {
-          message: 'Project not found',
-          type: 'error',
-        },
-      };
-    }
-  },
-};
 
 export const publicationResourceOptions = {
   navigation: {
@@ -96,6 +42,10 @@ export const publicationResourceOptions = {
         { value: 5, label: 'Stage 5' },
         { value: 6, label: 'Stage 6' },
         { value: 7, label: 'Stage 7' },
+        { value: 8, label: 'Stage 8' },
+        { value: 9, label: 'Stage 9-12' },
+        { value: 10, label: 'Stage 13-16' },
+        { value: 11, label: 'Stage 17-20' },
       ],
     },
     'projects.stageHistory': {
@@ -111,9 +61,6 @@ export const publicationResourceOptions = {
     },
     'certificate.url': {
       isVisible: { list: false, filter: false, show: true, edit: false },
-      components: {
-        show: Components.CertificateUrl,
-      },
     },
     'certificate.key': {
       isVisible: { list: false, filter: false, show: false, edit: false },
@@ -190,6 +137,5 @@ export const publicationResourceOptions = {
     show: {
       isAccessible: true,
     },
-    updateProjectStage: updateProjectStageAction,
   },
 };
