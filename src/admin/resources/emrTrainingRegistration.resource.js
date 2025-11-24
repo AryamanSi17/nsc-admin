@@ -1,4 +1,34 @@
 import { EmrTrainingRegistration } from '../../models/emrTrainingRegistration.model.js';
+import uploadFeature from '@adminjs/upload';
+import { componentLoader } from '../component-loader.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const certificateFeature = uploadFeature({
+  componentLoader,
+  provider: {
+    aws: {
+      region: process.env.AWS_REGION,
+      bucket: process.env.S3_BUCKET_NAME,
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    },
+  },
+  properties: {
+    key: 'certificate.key',
+    bucket: 'certificate.bucket',
+    mimeType: 'certificate.mimeType',
+    size: 'certificate.size',
+    filename: 'certificate.filename',
+  },
+  validation: {
+    mimeTypes: ['application/pdf', 'image/jpeg', 'image/png'],
+    maxSize: 5242880, // 5MB
+  },
+});
 
 export const emrTrainingRegistrationResourceOptions = {
   properties: {
@@ -72,8 +102,20 @@ export const emrTrainingRegistrationResourceOptions = {
       isVisible: { list: true, show: true, edit: true },
       type: 'boolean'
     },
-    'certificate.url': {
-      isVisible: { list: false, show: true, edit: false }
+    'certificate.key': {
+      isVisible: { list: false, show: false, edit: false }
+    },
+    'certificate.bucket': {
+      isVisible: { list: false, show: false, edit: false }
+    },
+    'certificate.mimeType': {
+      isVisible: { list: false, show: false, edit: false }
+    },
+    'certificate.size': {
+      isVisible: { list: false, show: false, edit: false }
+    },
+    'certificate.filename': {
+      isVisible: { list: false, show: false, edit: false }
     },
     'certificate.uploadedAt': {
       isVisible: { list: false, show: true, edit: false },
@@ -106,7 +148,7 @@ export const emrTrainingRegistrationResourceOptions = {
     'zoomLink',
     'adminNotes',
     'attendanceMarked',
-    'certificate.url',
+    'certificate.key',
     'certificate.uploadedAt',
     'certificate.uploadedBy',
     'confirmedBy',
@@ -126,7 +168,7 @@ export const emrTrainingRegistrationResourceOptions = {
         if (request.payload && request.payload.status) {
           const currentDate = new Date();
           const adminId = context.currentAdmin?._id;
-
+          
           if (request.payload.status === 'confirmed') {
             request.payload.confirmedAt = currentDate;
             request.payload.rejectedAt = null;
@@ -139,6 +181,13 @@ export const emrTrainingRegistrationResourceOptions = {
             request.payload.completedAt = currentDate;
           }
         }
+
+        if (request.payload && request.payload['certificate.key']) {
+          request.payload['certificate.uploadedAt'] = new Date();
+          request.payload['certificate.uploadedBy'] = context.currentAdmin?._id;
+          request.payload['certificate.url'] = `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${request.payload['certificate.key']}`;
+        }
+
         return request;
       }
     }
@@ -147,4 +196,10 @@ export const emrTrainingRegistrationResourceOptions = {
     name: 'EMR Training',
     icon: 'Calendar'
   }
+};
+
+export const emrTrainingRegistrationResource = {
+  resource: EmrTrainingRegistration,
+  options: emrTrainingRegistrationResourceOptions,
+  features: [certificateFeature],
 };

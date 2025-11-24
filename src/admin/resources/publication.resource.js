@@ -5,33 +5,41 @@ export const publicationResourceOptions = {
     name: 'Publications',
     icon: 'BookOpen',
   },
+
   properties: {
-    _id: {
-      isVisible: { list: true, filter: true, show: true, edit: false },
-    },
+    _id: { isVisible: { list: true, filter: true, show: true, edit: false } },
+
     user: {
       isVisible: { list: true, filter: true, show: true, edit: true },
       reference: 'User',
     },
+
     userName: {
       isVisible: { list: true, filter: true, show: true, edit: true },
     },
+
     userEmail: {
       isVisible: { list: true, filter: true, show: true, edit: true },
     },
+
     teamSize: {
       isVisible: { list: true, filter: true, show: true, edit: true },
     },
+
     numberOfProjects: {
       isVisible: { list: true, filter: true, show: true, edit: false },
     },
-    'projects': {
+
+    projects: {
       isVisible: { list: false, filter: false, show: true, edit: true },
       type: 'mixed',
+      isArray: true,
     },
+
     'projects.name': {
       isVisible: { list: false, filter: false, show: true, edit: true },
     },
+
     'projects.stage': {
       isVisible: { list: false, filter: false, show: true, edit: true },
       availableValues: [
@@ -48,9 +56,11 @@ export const publicationResourceOptions = {
         { value: 11, label: 'Stage 17-20' },
       ],
     },
+
     'projects.stageHistory': {
       isVisible: { list: false, filter: false, show: true, edit: false },
     },
+
     status: {
       isVisible: { list: true, filter: true, show: true, edit: true },
       availableValues: [
@@ -59,34 +69,40 @@ export const publicationResourceOptions = {
         { value: 'cancelled', label: 'Cancelled' },
       ],
     },
+
     'certificate.url': {
       isVisible: { list: false, filter: false, show: true, edit: false },
     },
-    'certificate.key': {
-      isVisible: { list: false, filter: false, show: false, edit: false },
-    },
+
+    'certificate.key': { isVisible: false },
+
     'certificate.uploadedAt': {
       isVisible: { list: false, filter: false, show: true, edit: false },
     },
+
     'certificate.uploadedBy': {
       isVisible: { list: false, filter: false, show: true, edit: false },
       reference: 'User',
     },
+
     createdAt: {
       isVisible: { list: true, filter: true, show: true, edit: false },
     },
+
     updatedAt: {
       isVisible: { list: true, filter: true, show: true, edit: false },
     },
   },
+
   listProperties: ['_id', 'userName', 'userEmail', 'teamSize', 'numberOfProjects', 'status', 'createdAt'],
   filterProperties: ['userName', 'userEmail', 'status', 'teamSize', 'createdAt'],
+
   showProperties: [
     '_id',
     'user',
-    'userName', 
-    'userEmail', 
-    'teamSize', 
+    'userName',
+    'userEmail',
+    'teamSize',
     'numberOfProjects',
     'projects',
     'status',
@@ -94,48 +110,71 @@ export const publicationResourceOptions = {
     'certificate.uploadedAt',
     'certificate.uploadedBy',
     'createdAt',
-    'updatedAt'
+    'updatedAt',
   ],
+
   editProperties: ['user', 'userName', 'userEmail', 'teamSize', 'projects', 'status'],
+
   actions: {
     new: {
       isAccessible: true,
       before: async (request) => {
-        if (request.payload && request.payload.projects) {
-          const projects = JSON.parse(request.payload.projects);
-          request.payload.numberOfProjects = projects.length;
-          
-          request.payload.projects = projects.map(project => ({
-            ...project,
-            stage: project.stage || 1,
-            stageHistory: [{
-              stage: project.stage || 1,
-              movedAt: new Date(),
-              movedBy: request.context?.currentAdmin?._id
-            }]
-          }));
-        }
-        return request;
+        return rebuildProjects(request);
       },
     },
+
     edit: {
       isAccessible: true,
       before: async (request) => {
-        if (request.payload && request.payload.projects) {
-          const projects = JSON.parse(request.payload.projects);
-          request.payload.numberOfProjects = projects.length;
-        }
-        return request;
+        return rebuildProjects(request);
       },
     },
-    delete: {
-      isAccessible: true,
-    },
-    list: {
-      isAccessible: true,
-    },
-    show: {
-      isAccessible: true,
-    },
+
+    delete: { isAccessible: true },
+    list: { isAccessible: true },
+    show: { isAccessible: true },
   },
 };
+
+/* --------------------------------------------------------
+   Helper to rebuild nested "projects" from flat payload
+--------------------------------------------------------- */
+function rebuildProjects(request) {
+  if (!request.payload) return request;
+
+  const payload = request.payload;
+
+  // Detect flat keys like: projects.0.name
+  const flatKeys = Object.keys(payload).filter((k) => k.startsWith('projects.'));
+
+  if (flatKeys.length === 0) return request;
+
+  const projects = [];
+
+  flatKeys.forEach((key) => {
+    const [, index, field] = key.split('.');
+    if (!projects[index]) projects[index] = {};
+    projects[index][field] = payload[key];
+  });
+
+  // Clean projects array
+  request.payload.projects = projects.map((p) => {
+    const stage = parseInt(p.stage) || 1;
+
+    return {
+      name: p.name,
+      stage,
+      stageHistory: [
+        {
+          stage,
+          movedAt: new Date(),
+          movedBy: request.context?.currentAdmin?._id,
+        },
+      ],
+    };
+  });
+
+  request.payload.numberOfProjects = projects.length;
+
+  return request;
+}
