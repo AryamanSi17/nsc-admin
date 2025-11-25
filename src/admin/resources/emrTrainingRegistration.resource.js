@@ -26,7 +26,7 @@ const certificateFeature = uploadFeature({
   },
   validation: {
     mimeTypes: ['application/pdf', 'image/jpeg', 'image/png'],
-    maxSize: 5242880, // 5MB
+    maxSize: 5242880,
   },
 });
 
@@ -36,12 +36,27 @@ export const emrTrainingRegistrationResourceOptions = {
       isVisible: { list: false, show: true, edit: false }
     },
     user: {
-      isVisible: { list: true, show: true, edit: false, filter: true },
+      isVisible: { list: true, show: true, edit: true, filter: true },
+      reference: 'User',
       position: 1
     },
     month: {
       isVisible: { list: true, show: true, edit: true, filter: true },
-      position: 2
+      position: 2,
+      availableValues: [
+        { value: 'January', label: 'January' },
+        { value: 'February', label: 'February' },
+        { value: 'March', label: 'March' },
+        { value: 'April', label: 'April' },
+        { value: 'May', label: 'May' },
+        { value: 'June', label: 'June' },
+        { value: 'July', label: 'July' },
+        { value: 'August', label: 'August' },
+        { value: 'September', label: 'September' },
+        { value: 'October', label: 'October' },
+        { value: 'November', label: 'November' },
+        { value: 'December', label: 'December' }
+      ]
     },
     date: {
       isVisible: { list: true, show: true, edit: true, filter: true },
@@ -84,10 +99,12 @@ export const emrTrainingRegistrationResourceOptions = {
       type: 'datetime'
     },
     confirmedBy: {
-      isVisible: { list: false, show: true, edit: false }
+      isVisible: { list: false, show: true, edit: false },
+      reference: 'User'
     },
     rejectedBy: {
-      isVisible: { list: false, show: true, edit: false }
+      isVisible: { list: false, show: true, edit: false },
+      reference: 'User'
     },
     rejectionReason: {
       isVisible: { list: false, show: true, edit: true }
@@ -122,7 +139,8 @@ export const emrTrainingRegistrationResourceOptions = {
       type: 'datetime'
     },
     'certificate.uploadedBy': {
-      isVisible: { list: false, show: true, edit: false }
+      isVisible: { list: false, show: true, edit: false },
+      reference: 'User'
     },
     createdAt: {
       isVisible: { list: false, show: true, edit: false }
@@ -132,6 +150,7 @@ export const emrTrainingRegistrationResourceOptions = {
     }
   },
   listProperties: ['user', 'month', 'date', 'year', 'status', 'sessionTime', 'attendanceMarked'],
+  filterProperties: ['user', 'month', 'date', 'year', 'status', 'sessionTime'],
   showProperties: [
     '_id',
     'user',
@@ -156,14 +175,43 @@ export const emrTrainingRegistrationResourceOptions = {
     'createdAt',
     'updatedAt'
   ],
+  editProperties: ['user', 'month', 'date', 'year', 'sessionTime', 'status', 'zoomLink', 'adminNotes', 'attendanceMarked', 'rejectionReason'],
   actions: {
     new: {
-      isAccessible: false
+      isAccessible: true,
+      before: async (request, context) => {
+        if (request.payload) {
+          if (!request.payload.status) {
+            request.payload.status = 'pending';
+          }
+          if (!request.payload.registeredAt) {
+            request.payload.registeredAt = new Date();
+          }
+          if (!request.payload.year) {
+            request.payload.year = new Date().getFullYear();
+          }
+          if (!request.payload.date) {
+            request.payload.date = new Date().getDate();
+          }
+          if (!request.payload.month) {
+            const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            request.payload.month = months[new Date().getMonth()];
+          }
+          if (!request.payload.sessionTime) {
+            request.payload.sessionTime = '2:00 PM - 5:00 PM';
+          }
+          if (!request.payload.attendanceMarked) {
+            request.payload.attendanceMarked = false;
+          }
+        }
+        return request;
+      }
     },
     delete: {
       isAccessible: ({ currentAdmin }) => currentAdmin && currentAdmin.role === 'admin'
     },
     edit: {
+      isAccessible: true,
       before: async (request, context) => {
         if (request.payload && request.payload.status) {
           const currentDate = new Date();
@@ -181,16 +229,16 @@ export const emrTrainingRegistrationResourceOptions = {
             request.payload.completedAt = currentDate;
           }
         }
-
         if (request.payload && request.payload['certificate.key']) {
           request.payload['certificate.uploadedAt'] = new Date();
           request.payload['certificate.uploadedBy'] = context.currentAdmin?._id;
           request.payload['certificate.url'] = `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${request.payload['certificate.key']}`;
         }
-
         return request;
       }
-    }
+    },
+    list: { isAccessible: true },
+    show: { isAccessible: true }
   },
   navigation: {
     name: 'EMR Training',
