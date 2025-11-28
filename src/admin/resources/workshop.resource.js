@@ -17,10 +17,10 @@ export const workshopResourceOptions = {
       ]
     },
     date: {
-      isVisible: { list: true, show: true, edit: true, filter: true },
-      position: 3,
-      type: 'date'
-    },
+  isVisible: { list: true, show: true, edit: true, filter: true },
+  position: 3
+},
+
     startTime: {
       isVisible: { list: true, show: true, edit: true },
       position: 4
