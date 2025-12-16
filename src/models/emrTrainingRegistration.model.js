@@ -8,7 +8,7 @@ const emrTrainingRegistrationSchema = new mongoose.Schema({
   },
   month: {
     type: String,
-    required: true,
+    required: false,
     enum: [
       'January', 'February', 'March', 'April', 'May', 'June',
       'July', 'August', 'September', 'October', 'November', 'December'
@@ -16,7 +16,7 @@ const emrTrainingRegistrationSchema = new mongoose.Schema({
   },
   year: {
     type: Number,
-    required: true,
+    required: false,
     default: 2025
   },
   sessionTime: {
