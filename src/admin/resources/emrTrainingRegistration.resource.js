@@ -58,21 +58,17 @@ export const emrTrainingRegistrationResourceOptions = {
         { value: 'December', label: 'December' }
       ]
     },
-    date: {
+    year: {
       isVisible: { list: true, show: true, edit: true, filter: true },
       position: 3
     },
-    year: {
+    sessionTime: {
       isVisible: { list: true, show: true, edit: true, filter: true },
       position: 4
     },
-    sessionTime: {
-      isVisible: { list: true, show: true, edit: true, filter: true },
-      position: 5
-    },
     status: {
       isVisible: { list: true, show: true, edit: true, filter: true },
-      position: 6,
+      position: 5,
       availableValues: [
         { value: 'pending', label: 'Pending' },
         { value: 'confirmed', label: 'Confirmed' },
@@ -83,7 +79,7 @@ export const emrTrainingRegistrationResourceOptions = {
     },
     registeredAt: {
       isVisible: { list: true, show: true, edit: false },
-      position: 7,
+      position: 6,
       type: 'datetime'
     },
     confirmedAt: {
@@ -149,13 +145,12 @@ export const emrTrainingRegistrationResourceOptions = {
       isVisible: { list: false, show: true, edit: false }
     }
   },
-  listProperties: ['user', 'month', 'date', 'year', 'status', 'sessionTime', 'attendanceMarked'],
-  filterProperties: ['user', 'month', 'date', 'year', 'status', 'sessionTime'],
+  listProperties: ['user', 'month', 'year', 'status', 'sessionTime', 'attendanceMarked'],
+  filterProperties: ['user', 'month', 'year', 'status', 'sessionTime'],
   showProperties: [
     '_id',
     'user',
     'month',
-    'date',
     'year',
     'sessionTime',
     'status',
@@ -175,7 +170,7 @@ export const emrTrainingRegistrationResourceOptions = {
     'createdAt',
     'updatedAt'
   ],
-  editProperties: ['user', 'month', 'date', 'year', 'sessionTime', 'status', 'zoomLink', 'adminNotes', 'attendanceMarked', 'rejectionReason'],
+  editProperties: ['user', 'month', 'year', 'sessionTime', 'status', 'zoomLink', 'adminNotes', 'attendanceMarked', 'rejectionReason'],
   actions: {
     new: {
       isAccessible: true,
@@ -189,9 +184,6 @@ export const emrTrainingRegistrationResourceOptions = {
           }
           if (!request.payload.year) {
             request.payload.year = new Date().getFullYear();
-          }
-          if (!request.payload.date) {
-            request.payload.date = new Date().getDate();
           }
           if (!request.payload.month) {
             const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];

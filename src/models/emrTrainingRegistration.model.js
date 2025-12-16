@@ -14,12 +14,6 @@ const emrTrainingRegistrationSchema = new mongoose.Schema({
       'July', 'August', 'September', 'October', 'November', 'December'
     ]
   },
-  date: {
-    type: Number,
-    required: true,
-    min: 1,
-    max: 31
-  },
   year: {
     type: Number,
     required: true,
@@ -82,7 +76,7 @@ const emrTrainingRegistrationSchema = new mongoose.Schema({
   timestamps: true 
 });
 
-emrTrainingRegistrationSchema.index({ user: 1, month: 1, date: 1, year: 1 }, { unique: true });
+emrTrainingRegistrationSchema.index({ user: 1, month: 1, year: 1 }, { unique: true });
 emrTrainingRegistrationSchema.index({ status: 1 });
 emrTrainingRegistrationSchema.index({ registeredAt: -1 });
 
